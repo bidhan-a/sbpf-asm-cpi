@@ -56,7 +56,6 @@ entrypoint:
   ldxdw r2, [r1 + SENDER_LAMPORTS]
   jlt r2, r4, error_insufficient_lamports
 
-
   ##############################
   ##    Stack allocations     ##
   ##############################
@@ -105,16 +104,6 @@ entrypoint:
   ldxb r3, [r1 + RECEIVER_HEADER + 1]
   stxb [r2 + 9], r3                                               # is_signer
 
-  # System account
-  add64 r2, 16
-  mov64 r3, r1
-  add64 r3, SYSTEM_PROGRAM_KEY
-  stxdw [r2 + 0], r3                                              # pubkey
-  ldxb r3, [r1 + SYSTEM_PROGRAM_HEADER + 2]
-  stxb [r2 + 8], r3                                               # is_writable
-  ldxb r3, [r1 + SYSTEM_PROGRAM_HEADER + 1]
-  stxb [r2 + 9], r3                                               # is_signer
-
 
   ############################
   ## Set up the instruction ##
@@ -126,7 +115,7 @@ entrypoint:
   stxdw [r2 + 0], r3                                              # program_id
   mov64 r3, r7
   stxdw [r2+8], r3                                                # accounts      
-  lddw r3, 3
+  lddw r3, 2
   stxdw [r2+16], r3                                               # account_len
   mov64 r3, r9
   stxdw [r2+24], r3                                               # data                   
@@ -188,31 +177,6 @@ entrypoint:
   ldxb r3, [r1 + RECEIVER_HEADER + 3]
   stxb [r2+50], r3                                                # is_executable
 
-  # System program
-  add64 r2, 56
-  mov64 r3, r1
-  add64 r3, SYSTEM_PROGRAM_KEY
-  stxdw [r2+0], r3                                                # key
-  mov64 r3, r1
-  add64 r3, SYSTEM_PROGRAM_LAMPORTS
-  stxdw [r2+8], r3                                                # lamports
-  ldxdw r3, [r1 + SYSTEM_PROGRAM_DATA_LEN]
-  stxdw [r2+16], r3                                               # data_len
-  mov64 r3, r1
-  add64 r3, SYSTEM_PROGRAM_DATA
-  stxdw [r2+24], r3                                               # data
-  mov64 r3, r1
-  add64 r3, SYSTEM_PROGRAM_OWNER
-  stxdw [r2+32], r3                                               # owner
-  ldxdw r3, [r1 + SYSTEM_PROGRAM_RENT_EPOCH]
-  stxdw [r2+40], r3                                               # rent_epoch
-  ldxb r3, [r1 + SYSTEM_PROGRAM_HEADER + 1]
-  stxb [r2+48], r3                                                # is_signer
-  ldxb r3, [r1 + SYSTEM_PROGRAM_HEADER + 2]
-  stxb [r2+49], r3                                                # is_writable
-  ldxb r3, [r1 + SYSTEM_PROGRAM_HEADER + 3]
-  stxb [r2+50], r3                                                # is_executable
-
 
   ####################
   ## Invoke the CPI ##
@@ -220,7 +184,7 @@ entrypoint:
   
   mov64 r1, r8                                                    # Instruction
   mov64 r2, r6                                                    # Account infos
-  lddw r3, 3                                                      # Number of account infos
+  lddw r3, 2                                                      # Number of account infos
   lddw r4, 0                                                      # No seeds required
   lddw r5, 0                                                      # Seed count 0
   call sol_invoke_signed_c
